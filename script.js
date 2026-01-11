@@ -5,8 +5,7 @@
  */
 
 // ★ 請將此處替換為你 GAS 部署後的「網頁應用程式網址」
-const GAS_API_URL = "
-https://script.google.com/macros/s/AKfycbyrFj5shNXl8EHY0PEipqCgQKlLJ94YXFPUPewLhp2x1I_gW8WAqObw9wK70KdU1PmPUw/exec"; 
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyrFj5shNXl8EHY0PEipqCgQKlLJ94YXFPUPewLhp2x1I_gW8WAqObw9wK70KdU1PmPUw/exec"; 
 
 /**
  * ============================================================
