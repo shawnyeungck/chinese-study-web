@@ -1,0 +1,472 @@
+/* =========================================
+   1. 全局設定 & 變數 (Global & Variables)
+   ========================================= */
+:root {
+    --app-bg: #FFFFFF;
+    --sidebar-bg: rgba(245, 245, 247, 0.85); /* macOS 側邊欄色調 */
+    --sidebar-border: #E5E5E5;
+    --accent-color: #007AFF; /* iOS Blue */
+    --accent-hover: #0062cc;
+    --text-primary: #1D1D1F;
+    --text-secondary: #86868B;
+    --card-bg: #FFFFFF;
+    --danger: #FF3B30;
+    --success: #34C759;
+}
+
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Noto Sans TC";
+    min-height: 100vh;
+    color: var(--text-primary);
+    overflow: hidden; /* 防止雙重滾動 */
+    
+    /* 動態背景動畫 */
+    background: linear-gradient(-45deg, #f3e7e9, #e3eeff, #e3fdf5, #ffe6fa);
+    background-size: 400% 400%; 
+    animation: gradientBG 15s ease infinite; 
+}
+
+/* 背景流動動畫 */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* 自定義滾動條 (隱藏式但可滾動) */
+.custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+.custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+
+/* =========================================
+   2. UI 元件 (UI Components)
+   ========================================= */
+
+/* 側邊欄樣式 (macOS Style) */
+.apple-sidebar {
+    background-color: var(--sidebar-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--sidebar-border);
+}
+
+/* 輸入框與選單 */
+.apple-input {
+    background: #E3E3E8;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text-primary);
+    transition: all 0.2s;
+    font-size: 14px;
+    outline: none;
+}
+.apple-input:focus {
+    background: #FFFFFF;
+    box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.apple-select {
+    background-color: #FFFFFF;
+    border: 1px solid #D1D1D6;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    outline: none;
+}
+.apple-select:hover {
+    border-color: var(--accent-color);
+}
+
+/* 按鈕樣式 */
+.btn-apple-primary {
+    background-color: var(--accent-color);
+    color: white;
+    border-radius: 999px; /* Pill shape */
+    padding: 8px 20px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
+}
+.btn-apple-primary:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);
+}
+.btn-apple-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-apple-secondary {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-apple-secondary:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* 列表項目 */
+.group-item {
+    background: transparent;
+    border-radius: 10px;
+    padding: 12px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+}
+.group-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+.group-item.active {
+    background: var(--accent-color);
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+}
+.group-item.active * {
+    color: white !important;
+    border-color: rgba(255,255,255,0.3) !important;
+    background-color: rgba(255,255,255,0.2) !important;
+}
+
+/* 卡片與容器 */
+.question-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    border: 1px solid #E5E5E5;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    transition: all 0.2s;
+}
+.question-card:hover {
+    box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+    border-color: #d1d5db;
+}
+
+/* 玻璃面板 (Modal用) */
+.glass-panel { 
+    background: rgba(255, 255, 255, 0.85); 
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5); 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+}
+
+/* 卡片懸停效果 (學生端首頁) */
+.card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.card-hover:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-color: #a5b4fc;
+}
+
+/* =========================================
+   3. 編輯與題目樣式 (Editor & Quiz Styles)
+   ========================================= */
+
+/* 標記樣式 */
+.highlight-mark { 
+    background-color: #dcfce7; color: #14532d; 
+    padding: 2px 6px; border-radius: 4px; font-weight: bold; 
+    border-bottom: 3px solid #22c55e; cursor: pointer; 
+    font-size: 1.05em; transition: all 0.2s;
+    display: inline-block; 
+}
+.highlight-mark:hover { 
+    background-color: #fee2e2; color: #b91c1c; 
+    border-bottom-color: #ef4444; 
+}
+
+.proper-noun-mark {
+    border-bottom: 3px double #3b82f6; color: #1e3a8a;
+    padding-bottom: 1px; font-weight: bold; cursor: pointer; 
+    transition: all 0.2s;
+    display: inline-block;
+}
+.proper-noun-mark:hover { 
+    background-color: #eff6ff; color: #ef4444; 
+    border-bottom-color: #ef4444; 
+}
+
+/* 編輯區輸入框 (Rich Text) */
+.rich-text-input, .sentence-input {
+    font-size: 1.1rem; 
+    line-height: 1.8; 
+    padding: 16px;
+    border: 2px solid #e2e8f0; 
+    border-radius: 12px; 
+    background: #f8fafc;       
+    outline: none; 
+    min-height: 100px; 
+    white-space: pre-wrap; 
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+.rich-text-input:focus, .sentence-input:focus { 
+    border-color: #818cf8; 
+    background: #ffffff;   
+    box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.15); 
+}
+.rich-text-input:hover, .sentence-input:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+}
+
+/* 圖片預覽區 */
+.image-preview-box {
+    width: 80px; height: 80px; 
+    border-radius: 8px; border: 2px dashed #cbd5e1;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; background: #f8fafc; 
+    cursor: pointer; position: relative;
+    flex-shrink: 0; 
+}
+.image-preview-box img { 
+    width: 100%; height: 100%; 
+    object-fit: cover; transition: transform 0.2s; 
+}
+.image-preview-box:hover img { transform: scale(1.1); }
+.image-preview-box:hover { border-color: #6366f1; }
+
+/* =========================================
+   4. 默書與詞語樣式 (Dictation & Vocab)
+   ========================================= */
+
+.grid-box {
+    width: 52px; height: 52px; 
+    border: 2px solid #cbd5e1; 
+    border-radius: 12px;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 24px; font-weight: 700; color: #475569; 
+    background-color: white;
+    margin: 3px;
+    transition: all 0.2s;
+}
+.grid-box.active { 
+    border-color: #8b5cf6; 
+    background-color: white; 
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2); 
+    transform: scale(1.1); 
+    z-index: 10; 
+}
+.grid-box.correct { background-color: #dcfce7; border-color: #22c55e; color: #15803d; }
+.grid-box.wrong { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+.grid-box.static-hint { background-color: #f1f5f9; border-color: #e2e8f0; color: #94a3b8; font-family: 'Noto Serif TC', serif; pointer-events: none; }
+.grid-box.input-target { background-color: #ffffff; border: 2px dashed #cbd5e1; }
+
+.punctuation { 
+    display: inline-flex; justify-content: center; align-items: center; 
+    width: 30px; height: 52px; margin: 3px; 
+    font-size: 22px; color: #94a3b8; font-family: serif; 
+    vertical-align: middle; user-select: none; 
+}
+
+.vocab-row {
+    display: flex; align-items: center; margin-bottom: 8px; padding: 8px 12px;
+    background-color: #F9FAFB; border: 1px solid #E5E7EB;
+    border-radius: 12px; transition: all 0.2s;
+}
+.vocab-row.focused {
+    background-color: #eff6ff; border-color: #60a5fa; transform: scale(1.01);
+}
+.vocab-num {
+    font-weight: bold; color: #64748b; width: 32px; text-align: center; font-size: 1.1rem;
+}
+.vocab-grids {
+    display: flex; flex-wrap: wrap; gap: 4px; flex: 1;
+}
+.vocab-audio-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background-color: #e0e7ff; color: #4f46e5;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; border: none; transition: all 0.2s;
+}
+.vocab-audio-btn:hover { background-color: #4f46e5; color: white; }
+
+/* =========================================
+   5. 拖放與填充樣式 (Drag & Drop / Fill-in)
+   ========================================= */
+
+/* 詞語 Chips */
+.word-chip { 
+    display: inline-flex; align-items: center; 
+    padding: 0.35rem 0.85rem; border-radius: 9999px; 
+    font-size: 0.95rem; font-weight: 600; 
+    background: white; border: 1px solid #cbd5e1; 
+    color: #475569; 
+    margin-right: 0.5rem; margin-bottom: 0.5rem; 
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
+    transition: all 0.2s;
+    cursor: grab; user-select: none;
+}
+.word-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.word-chip:active { cursor: grabbing; transform: scale(0.95); }
+.word-chip.selected-word { 
+    background-color: #818cf8; color: white; 
+    border-color: #6366f1; transform: scale(1.05); 
+}
+
+/* 後台編輯用的 Chips */
+.chip { 
+    display: inline-flex; align-items: center; 
+    padding: 0.35rem 0.85rem; border-radius: 9999px; 
+    font-size: 0.95rem; font-weight: 600; 
+    margin-right: 0.5rem; margin-bottom: 0.5rem; 
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
+}
+.chip-indigo { background-color: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+.chip-orange { background-color: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+.chip-close { margin-left: 0.6rem; cursor: pointer; opacity: 0.6; font-size: 1.1em; }
+.chip-close:hover { opacity: 1; color: #ef4444; }
+
+/* 拖放目標區域 */
+.drop-zone { 
+    display: inline-flex; align-items: center; justify-content: center; 
+    min-width: 80px; height: 40px; margin: 0 4px; padding: 0 8px; 
+    border-bottom: 2px dashed #cbd5e1; background-color: rgba(241, 245, 249, 0.5); 
+    border-radius: 6px; color: #475569; font-weight: bold; vertical-align: middle; 
+}
+.drop-zone.filled { border-bottom-style: solid; background-color: white; cursor: pointer; }
+.drop-zone.correct { background-color: #dcfce7; border-bottom-color: #22c55e; color: #15803d; }
+.drop-zone.wrong { background-color: #fee2e2; border-bottom-color: #ef4444; color: #b91c1c; }
+
+/* 不供詞填充輸入框 */
+.fill-input {
+    display: inline-block;
+    border: none;
+    border-bottom: 2px solid #94a3b8;
+    background-color: transparent;
+    color: #1e293b;
+    font-weight: bold;
+    text-align: center;
+    padding: 0 4px;
+    margin: 0 4px;
+    outline: none;
+    transition: all 0.2s;
+    font-size: 1.1rem;
+    border-radius: 4px 4px 0 0;
+}
+.fill-input:focus {
+    border-bottom-color: #6366f1;
+    background-color: rgba(99, 102, 241, 0.1);
+}
+.fill-input.correct {
+    border-bottom-color: #22c55e;
+    color: #15803d;
+    background-color: #dcfce7;
+}
+.fill-input.wrong {
+    border-bottom-color: #ef4444;
+    color: #b91c1c;
+    background-color: #fee2e2;
+}
+.answer-feedback {
+    font-size: 0.85em;
+    color: #ef4444;
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+/* =========================================
+   6. 標點與專名號樣式 (Punctuation & Proper Noun)
+   ========================================= */
+
+.char-interactive {
+    display: inline-block;
+    padding: 2px 1px;
+    margin: 0 1px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent; /* 預留位置 */
+    transition: all 0.2s;
+    font-size: 1.3rem;
+    line-height: 1.8;
+    user-select: none;
+}
+.char-interactive:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+}
+
+/* 學生點擊後的狀態 (顯示專名號) */
+.char-interactive.active-pn {
+    border-bottom: 3px double #3b82f6; /* 藍色雙底線 */
+    color: #1d4ed8;
+}
+
+/* 核對答案：正確 */
+.char-interactive.pn-correct {
+    border-bottom: 3px solid #22c55e;
+    color: #15803d;
+    background-color: #dcfce7;
+}
+
+/* 核對答案：錯誤 (原本沒線卻畫了線，或原本有線卻沒畫) */
+.char-interactive.pn-wrong {
+    border-bottom: 3px solid #ef4444;
+    color: #b91c1c;
+    background-color: #fee2e2;
+}
+
+/* 學生漏選 (虛線 + 半透明，提示用) */
+.char-interactive.pn-missed {
+    border-bottom: 3px dashed #22c55e;
+    color: #86efac; 
+    background-color: transparent;
+}
+
+/* 標點符號拖放格 */
+.punc-drop-zone {
+    display: inline-flex;
+    width: 40px; height: 40px;
+    border-bottom: 2px solid #94a3b8;
+    background-color: #f1f5f9;
+    margin: 0 4px;
+    vertical-align: middle;
+    align-items: center; justify-content: center;
+    border-radius: 6px;
+}
+.punc-drop-zone.filled { background-color: white; border-bottom-style: solid; }
+
+.punc-chip {
+    font-family: "Noto Serif TC", serif;
+    font-size: 1.2rem;
+    padding: 4px 12px;
+}
+
+/* =========================================
+   7. 動畫 (Animations)
+   ========================================= */
+@keyframes bounceIn { 
+    0% { transform: scale(0.95); opacity: 0; } 
+    100% { transform: scale(1); opacity: 1; } 
+}
+.animate-bounce-in { animation: bounceIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+.shake { animation: shake 0.5s; }
+@keyframes shake { 
+    0% { transform: translateX(0); } 
+    25% { transform: translateX(-5px); } 
+    50% { transform: translateX(5px); } 
+    75% { transform: translateX(-5px); } 
+    100% { transform: translateX(0); } 
+}
+
+.correct-anim { animation: pulse 0.5s; background-color: #86efac !important; }
+@keyframes pulse { 
+    0% { transform: scale(1); } 
+    50% { transform: scale(1.05); } 
+    100% { transform: scale(1); } 
+}

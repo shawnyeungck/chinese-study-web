@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 學校溫習系統</title> <!-- 這裡可以改為你的網站標題 -->
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- 引入外部樣式表 -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- 全局錯誤捕捉器 -->
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            var errorMsg = "⚠️ 程式執行錯誤: " + message + " (Line: " + lineno + ")";
+            console.error(errorMsg);
+            // 嘗試顯示在選單區
+            var menu = document.getElementById('levelMenu');
+            if (menu) {
+                // 只有在非正式環境才顯示錯誤給使用者看，這裡保留作為 Debug 用
+                // menu.innerHTML = '<li class="px-6 py-4 text-red-500 font-bold bg-red-50 rounded-lg border border-red-200 text-xs">' + errorMsg + '</li>';
+            }
+        };
+
+        // 預設年級資料 (之後 script.js 會嘗試從 API 更新此列表)
+        var SERVER_LEVELS = ['FS1', 'FS2', 'DS1', 'DS2', 'DS3']; 
+    </script>
+</head>
+
+<!-- 背景動畫樣式已移至 style.css，這裡保留 class -->
+<body class="h-screen flex overflow-hidden selection:bg-purple-200 selection:text-purple-900">
+
+    <!-- === 側邊欄 (Desktop) === -->
+    <aside class="w-72 glass-panel border-r border-white/50 flex-shrink-0 hidden md:flex flex-col z-20 m-4 rounded-3xl overflow-hidden shadow-xl">
+        <div class="p-8 bg-gradient-to-r from-indigo-500 to-purple-600 text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full"></div>
+            <!-- 標題區域：script.js 載入後可透過 API 更新這些文字 -->
+            <h1 class="text-2xl font-bold tracking-tight relative z-10" id="appMainTitle">溫習小站</h1>
+            <p class="text-xs font-medium text-indigo-100 mt-2 relative z-10 tracking-wider uppercase" id="appSubTitle">AI Learning System</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-6 px-3">
+            <ul class="space-y-2" id="levelMenu">
+                <li id="loadingText" class="px-6 py-2 text-gray-500 text-sm animate-pulse">
+                    正在連線至題庫... <br>
+                    <span class="text-xs opacity-70">(若過久無反應請檢查網路)</span>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- === 主內容區 === -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- 手機版 Header -->
+        <header class="md:hidden glass-panel m-2 rounded-2xl p-4 flex justify-between items-center shadow-lg z-20">
+            <h1 class="font-bold text-lg text-indigo-800">溫習小站</h1>
+            <select id="mobileLevelSelect" class="bg-white/50 border border-indigo-100 rounded-lg px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-indigo-400"></select>
+        </header>
+
+        <!-- 頂部標題與狀態 -->
+        <div class="px-8 pt-8 pb-4 flex justify-between items-center z-10">
+            <h2 id="currentLevelTitle" class="text-3xl font-bold text-slate-800 tracking-tight drop-shadow-sm">請選擇年級</h2>
+        </div>
+
+        <!-- 題目卡片列表區 -->
+        <div id="contentArea" class="flex-1 overflow-y-auto p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 content-start pb-20 custom-scroll">
+            <div class="col-span-full text-center text-slate-400 mt-20 flex flex-col items-center">
+                <div class="w-16 h-16 bg-white/50 rounded-full flex items-center justify-center mb-4 text-3xl shadow-sm">👈</div>
+                <p class="text-lg">請在左側選擇年級以開始溫習</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- === 測驗 Modal (做題視窗) === -->
+    <div id="quizModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 transition-all">
+        <div class="glass-panel bg-white/90 rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh] transform transition-all scale-100">
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-5 text-white flex justify-between items-center shrink-0">
+                <h3 id="modalTitle" class="text-xl font-bold tracking-wide">題目標題</h3>
+                
+                <div class="flex items-center gap-4">
+                    <div id="quizTimer" class="hidden bg-white/20 px-3 py-1 rounded-lg font-mono font-bold tracking-wider text-indigo-50 border border-white/30 backdrop-blur-sm">00:00</div>
+                    <button onclick="closeModal()" class="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-colors">✕</button>
+                </div>
+            </div>
+            <div id="modalContent" class="p-8 overflow-y-auto flex-1 text-lg custom-scroll"></div>
+        </div>
+    </div>
+
+    <!-- === 成績輸入 Modal === -->
+    <div id="studentInfoModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center z-[60] p-4">
+        <div class="glass-panel bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-bounce-in flex flex-col max-h-[90vh]">
+            <!-- 視圖1: 表單 -->
+            <div id="uploadFormView" class="flex flex-col h-full">
+                <div class="bg-gradient-to-r from-emerald-400 to-teal-500 p-6 text-white text-center relative flex-shrink-0">
+                    <h3 class="text-2xl font-bold relative z-10">🎉 完成了！</h3>
+                    <p class="text-emerald-50 text-sm mt-1 relative z-10">請填寫資料以上傳成績</p>
+                </div>
+                <div class="p-6 space-y-5 overflow-y-auto flex-1 custom-scroll">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-2 text-sm uppercase tracking-wide">1. 選擇班級 (Class)</label>
+                        <div class="flex gap-3">
+                            <select id="inputGrade" onchange="updateClassLetters()" class="w-1/2 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 outline-none transition-shadow"></select>
+                            <select id="inputLetter" class="w-1/2 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 outline-none transition-shadow"></select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-2 text-sm uppercase tracking-wide">2. 選擇學號 (No.)</label>
+                        <select id="inputNumber" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 outline-none max-h-40 transition-shadow"></select>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="w-1/2 bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-center">
+                            <span class="text-slate-500 text-sm font-bold">本次得分</span>
+                            <div class="text-3xl font-black text-emerald-600 mt-1"><span id="displayScore"></span> <span class="text-sm font-normal text-emerald-500">分</span></div>
+                        </div>
+                        <div class="w-1/2 bg-slate-50 border border-slate-200 p-4 rounded-xl text-center">
+                            <span class="text-slate-500 text-sm font-bold">作答時間</span>
+                            <div class="text-xl font-bold text-slate-700 mt-2" id="displayTime">00:00</div>
+                        </div>
+                    </div>
+                    <button onclick="switchStudentModalView('review')" class="w-full py-3 border-2 border-indigo-100 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:border-indigo-200 rounded-xl font-bold transition-all flex items-center justify-center gap-2 group">
+                        <span>🔍 查看作答詳情</span>
+                        <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    </button>
+                </div>
+                <div class="p-5 border-t border-slate-100 flex justify-between bg-white/50 flex-shrink-0">
+                    <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600 px-4 text-sm font-bold">取消</button>
+                    <button onclick="finalSubmit()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-emerald-500/30 transition-all active:scale-95">確認上傳 🚀</button>
+                </div>
+            </div>
+            
+            <!-- 視圖2: 詳細回顧 -->
+            <div id="reviewDetailsView" class="hidden flex flex-col h-full relative">
+                <div class="bg-white p-4 border-b border-slate-200 flex-shrink-0 flex items-center justify-between z-10 shadow-sm">
+                    <button onclick="switchStudentModalView('upload')" class="text-slate-500 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1">
+                        <span class="text-xl leading-none pb-0.5">←</span><span class="text-sm">返回</span>
+                    </button>
+                    <h3 class="text-lg font-bold text-slate-700 absolute left-1/2 transform -translate-x-1/2 pointer-events-none">作答回顧</h3>
+                    <div class="w-16"></div>
+                </div>
+                <div id="submissionDetails" class="p-6 space-y-3 overflow-y-auto flex-1 custom-scroll bg-slate-50/50"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- === 圖片檢視 Modal === -->
+    <div id="imageViewerModal" class="fixed inset-0 z-[200] bg-black/95 hidden flex items-center justify-center p-4 cursor-zoom-out opacity-0 transition-opacity duration-300" onclick="closeImageViewer()">
+        <img id="expandedImg" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl transform transition-transform duration-300 scale-95 select-none" onclick="event.stopPropagation()">
+    </div>
+
+    <!-- === 引入 YouTube API === -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <!-- === 引入分離的 JavaScript 檔案 === -->
+    <!-- 請確保這些檔案與 index.html 在同一目錄下 -->
+    <script src="js-mcq.js"></script>
+    <script src="js-dictation.js"></script>
+    <script src="js-dragdrop.js"></script>
+    <script src="js-punctuation.js"></script>
+    <script src="js-youtube.js"></script>
+    
+    <!-- 主邏輯 (包含與 GAS API 通訊的部分) -->
+    <script src="script.js"></script>
+
+</body>
+</html>
